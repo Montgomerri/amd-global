@@ -2,7 +2,7 @@
 import swell from "../../lib/swell";
 import ProductsClient from "./ProductsClient";
 
-export const revalidate = 60;
+export const revalidate = 30;
 
 export default async function ProductsPage() {
   const response = await swell.products.list({
