@@ -1,9 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { ShoppingBag, X, SlidersHorizontal, ChevronDown, ChevronLeft, ChevronRight, ShoppingCart, Check } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  ShoppingBag,
+  X,
+  SlidersHorizontal,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ShoppingCart,
+  Check,
+} from "lucide-react";
 import { useCart } from "@/lib/cartContext";
 import Link from "next/link";
+import swell from "@/lib/swell";
 
 const filters = [
   { label: "Category", options: ["Electronics", "Clothing", "Home", "Sports"] },
@@ -12,22 +22,58 @@ const filters = [
   { label: "Availability", options: ["In Stock", "Out of Stock"] },
 ];
 
-export default function ProductsClient({ products }: { products: any[] }) {
+export default function ProductsClient() {
   const { addItem, totalCount } = useCart();
+
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [openFilter, setOpenFilter] = useState<string | null>(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
 
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await swell.products.list({
+          limit: 20,
+          expand: ["images"],
+        });
+
+        setProducts(response.results || []);
+      } catch (err) {
+        console.error("Failed to load products:", err);
+        setError("Could not load products right now.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    setActiveImageIndex(0);
+  }, [selectedProduct]);
+
   const getImageUrl = (product: any) =>
-    product.image?.file?.url ||
-    (product.images?.length > 0 ? product.images[0].file.url : "/no-image.png");
+    product?.image?.file?.url ||
+    (product?.images?.length > 0 ? product.images[0].file.url : "/no-image.png");
 
   const getProductImages = (product: any): string[] => {
+    if (!product) return ["/no-image.png"];
+
     if (product.images && product.images.length > 0) {
       return product.images.map((img: any) => img.file.url);
     }
+
     if (product.image?.file?.url) return [product.image.file.url];
+
     return ["/no-image.png"];
   };
 
@@ -37,24 +83,29 @@ export default function ProductsClient({ products }: { products: any[] }) {
   };
 
   const handlePrevImage = () => {
+    if (!selectedProduct) return;
     const images = getProductImages(selectedProduct);
     setActiveImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
   };
 
   const handleNextImage = () => {
+    if (!selectedProduct) return;
     const images = getProductImages(selectedProduct);
     setActiveImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   };
 
   const handleAddToCart = (e: React.MouseEvent, product: any) => {
     e.stopPropagation();
+
     addItem({
       id: product.id,
       name: product.name,
       price: product.price,
       image: getImageUrl(product),
     });
+
     setAddedIds((prev) => new Set(prev).add(product.id));
+
     setTimeout(() => {
       setAddedIds((prev) => {
         const next = new Set(prev);
@@ -66,16 +117,14 @@ export default function ProductsClient({ products }: { products: any[] }) {
 
   return (
     <main className="min-h-screen bg-gray-100 font-sans">
-      {/* Top Bar */}
       <div className="bg-white border-b px-6 py-3 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-3">
           <SlidersHorizontal className="h-5 w-5 text-gray-500" />
           <span className="text-sm font-semibold text-gray-700">
-            {products.length} Products
+            {loading ? "Loading..." : `${products.length} Products`}
           </span>
         </div>
 
-        {/* Cart Icon with badge */}
         <Link href="/cart" className="relative p-2 rounded-full hover:bg-gray-100 transition">
           <ShoppingCart className="h-5 w-5 text-gray-700" />
           {totalCount > 0 && (
@@ -87,7 +136,6 @@ export default function ProductsClient({ products }: { products: any[] }) {
       </div>
 
       <div className="flex max-w-7xl mx-auto px-4 py-6 gap-6">
-        {/* Sidebar Filters */}
         <aside className="hidden lg:block w-56 shrink-0">
           <div className="bg-white rounded-lg shadow p-4">
             <h2 className="text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide">
@@ -125,61 +173,80 @@ export default function ProductsClient({ products }: { products: any[] }) {
           </div>
         </aside>
 
-        {/* Product Grid */}
         <section className="flex-1">
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-            {products.map((product) => {
-              const imageUrl = getImageUrl(product);
-              const isAdded = addedIds.has(product.id);
-              return (
-                <div
-                  key={product.id}
-                  onClick={() => handleSelectProduct(product)}
-                  className="bg-white rounded-lg shadow hover:shadow-md transition cursor-pointer group overflow-hidden"
-                >
-                  <div className="relative h-48 bg-gray-50 overflow-hidden">
-                    <img
-                      src={imageUrl}
-                      alt={product.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
+          {loading && (
+            <div className="bg-white rounded-lg shadow p-6 text-sm text-gray-600">
+              Loading products...
+            </div>
+          )}
+
+          {!loading && error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 text-sm">
+              {error}
+            </div>
+          )}
+
+          {!loading && !error && products.length === 0 && (
+            <div className="bg-white rounded-lg shadow p-6 text-sm text-gray-600">
+              No products found.
+            </div>
+          )}
+
+          {!loading && !error && products.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+              {products.map((product) => {
+                const imageUrl = getImageUrl(product);
+                const isAdded = addedIds.has(product.id);
+
+                return (
+                  <div
+                    key={product.id}
+                    onClick={() => handleSelectProduct(product)}
+                    className="bg-white rounded-lg shadow hover:shadow-md transition cursor-pointer group overflow-hidden"
+                  >
+                    <div className="relative h-48 bg-gray-50 overflow-hidden">
+                      <img
+                        src={imageUrl}
+                        alt={product.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                    <div className="p-4">
+                      <h2 className="text-sm font-semibold text-gray-800 line-clamp-2">
+                        {product.name}
+                      </h2>
+                      <p className="mt-1 text-lg font-bold text-gray-900">
+                        ₵{product.price}
+                      </p>
+                      <button
+                        onClick={(e) => handleAddToCart(e, product)}
+                        className={`mt-3 w-full flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${
+                          isAdded
+                            ? "bg-green-500 text-white"
+                            : "bg-lime-400 text-zinc-900 hover:bg-lime-300"
+                        }`}
+                      >
+                        {isAdded ? (
+                          <>
+                            <Check className="h-4 w-4" />
+                            Added!
+                          </>
+                        ) : (
+                          <>
+                            <ShoppingBag className="h-4 w-4" />
+                            Add to Cart
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
-                  <div className="p-4">
-                    <h2 className="text-sm font-semibold text-gray-800 line-clamp-2">
-                      {product.name}
-                    </h2>
-                    <p className="mt-1 text-lg font-bold text-gray-900">
-                      ₵{product.price}
-                    </p>
-                    <button
-                      onClick={(e) => handleAddToCart(e, product)}
-                      className={`mt-3 w-full flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${
-                        isAdded
-                          ? "bg-green-500 text-white"
-                          : "bg-lime-400 text-zinc-900 hover:bg-lime-300"
-                      }`}
-                    >
-                      {isAdded ? (
-                        <>
-                          <Check className="h-4 w-4" />
-                          Added!
-                        </>
-                      ) : (
-                        <>
-                          <ShoppingBag className="h-4 w-4" />
-                          Add to Cart
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </section>
       </div>
 
-      {/* Backdrop */}
       {selectedProduct && (
         <div
           className="fixed inset-0 bg-black/40 z-40 transition-opacity"
@@ -187,7 +254,6 @@ export default function ProductsClient({ products }: { products: any[] }) {
         />
       )}
 
-      {/* Slide-in Drawer */}
       <div
         className={`fixed top-0 right-0 h-full w-full sm:w-[420px] bg-white z-50 shadow-2xl transform transition-transform duration-300 ease-in-out ${
           selectedProduct ? "translate-x-0" : "translate-x-full"
@@ -196,9 +262,9 @@ export default function ProductsClient({ products }: { products: any[] }) {
         {selectedProduct && (() => {
           const images = getProductImages(selectedProduct);
           const isAdded = addedIds.has(selectedProduct.id);
+
           return (
             <div className="flex flex-col h-full">
-              {/* Drawer Header */}
               <div className="flex items-center justify-between px-6 py-4 border-b">
                 <h2 className="text-lg font-bold text-gray-800">Product Details</h2>
                 <button
@@ -209,9 +275,7 @@ export default function ProductsClient({ products }: { products: any[] }) {
                 </button>
               </div>
 
-              {/* Drawer Body */}
               <div className="flex-1 overflow-y-auto p-6">
-                {/* Main Image with Arrows */}
                 <div className="relative w-full h-64 rounded-lg overflow-hidden bg-gray-50">
                   <img
                     src={images[activeImageIndex]}
@@ -236,7 +300,6 @@ export default function ProductsClient({ products }: { products: any[] }) {
                   )}
                 </div>
 
-                {/* Thumbnail Strip */}
                 {images.length > 1 && (
                   <div className="flex gap-2 mt-3">
                     {images.map((url, index) => (
@@ -272,7 +335,6 @@ export default function ProductsClient({ products }: { products: any[] }) {
                 )}
               </div>
 
-              {/* Drawer Footer */}
               <div className="px-6 py-4 border-t bg-gray-50 flex flex-col gap-2">
                 <button
                   onClick={(e) => handleAddToCart(e, selectedProduct)}
@@ -294,6 +356,7 @@ export default function ProductsClient({ products }: { products: any[] }) {
                     </>
                   )}
                 </button>
+
                 <Link
                   href="/cart"
                   className="w-full flex items-center justify-center gap-2 rounded-full border border-gray-300 px-6 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-100 transition"

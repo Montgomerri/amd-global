@@ -1,14 +1,8 @@
 // app/products/page.tsx
-import swell from "../../lib/swell";
 import ProductsClient from "./ProductsClient";
 
-export const revalidate = 30;
+export const dynamic = "force-dynamic";
 
-export default async function ProductsPage() {
-  const response = await swell.products.list({
-    limit: 20,
-    expand: ["images"],
-  });
-
-  return <ProductsClient products={response.results} />;
+export default function ProductsPage() {
+  return <ProductsClient />;
 }
