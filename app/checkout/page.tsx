@@ -4,7 +4,7 @@ import { useState } from "react";
 import { X, ShieldCheck, Lock } from "lucide-react";
 import { useCart } from "@/lib/cartContext";
 import Link from "next/link";
-import PaystackPop from "@paystack/inline-js";
+const PaystackPop: any = require("@paystack/inline-js");
 import swell from "@/lib/swell";
 
 export default function CheckoutClient() {
