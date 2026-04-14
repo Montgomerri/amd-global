@@ -41,6 +41,42 @@ export default function CheckoutPage() {
       document.body.appendChild(script);
     });
 
+  const submitOrderToSwell = (transaction: any) => {
+    setProcessing(true);
+    swell.cart.setItems(
+      items.map((item) => ({
+        product_id: item.id,
+        quantity: item.quantity,
+      }))
+    )
+    .then(() => swell.cart.update({
+      billing: {
+        method: "paystack",
+        email: form.email,
+        address1: form.address,
+        city: form.city,
+        state: form.state,
+        country: "GH",
+      },
+      shipping: {
+        address1: form.address,
+        city: form.city,
+        state: form.state,
+        country: "GH",
+      },
+    }))
+    .then(() => swell.cart.submitOrder())
+    .then((order: any) => {
+      clearCart();
+      window.location.href = `/success?ref=${transaction.reference}&order=${order?.number || ""}`;
+    })
+    .catch((err: any) => {
+      console.error("Order submission error:", err);
+      clearCart();
+      window.location.href = `/success?ref=${transaction.reference}`;
+    });
+  };
+
   const handlePayment = async () => {
     if (!form.email) return alert("Please enter your email");
     if (items.length === 0) return alert("Your cart is empty");
@@ -55,47 +91,10 @@ export default function CheckoutPage() {
         email: form.email,
         amount: Math.round(total * 100),
         currency: "GHS",
-
-        callback: async (transaction: any) => {
-          setProcessing(true);
-          try {
-            await swell.cart.setItems(
-              items.map((item) => ({
-                product_id: item.id,
-                quantity: item.quantity,
-              }))
-            );
-
-            await swell.cart.update({
-              billing: {
-                method: "paystack",
-                email: form.email,
-                address1: form.address,
-                city: form.city,
-                state: form.state,
-                country: "GH",
-              },
-              shipping: {
-                address1: form.address,
-                city: form.city,
-                state: form.state,
-                country: "GH",
-              },
-            });
-
-            const order = await swell.cart.submitOrder();
-            clearCart();
-            window.location.href = `/success?ref=${transaction.reference}&order=${order?.number || ""}`;
-          } catch (err) {
-            console.error("Order submission error:", err);
-            clearCart();
-            window.location.href = `/success?ref=${transaction.reference}`;
-          } finally {
-            setProcessing(false);
-          }
+        callback: function(transaction: any) {
+          submitOrderToSwell(transaction);
         },
-
-        onClose: () => {},
+        onClose: function() {},
       });
 
       handler.openIframe();
