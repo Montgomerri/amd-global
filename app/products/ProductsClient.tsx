@@ -433,11 +433,11 @@ export default function ProductsClient() {
               <Menu className="h-6 w-6 text-gray-800" />
             </button>
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 lg:w-9 lg:h-9 bg-[#FA6338] rounded-lg flex items-center justify-center text-white font-bold italic text-lg lg:text-xl">
-                S
+              <div className="w-8 h-8 lg:w-9 lg:h-9 bg-[#9AE600] rounded-lg flex items-center justify-center text-white font-bold italic text-lg lg:text-xl">
+                
               </div>
               <span className="text-xl lg:text-2xl font-bold tracking-tight hidden sm:block">
-                Super Mart
+                AMN GLOBAL
               </span>
             </Link>
           </div>
@@ -454,34 +454,34 @@ export default function ProductsClient() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="What are you looking for..."
-              className="w-full bg-[#F3F4F6] py-3.5 pl-32 pr-12 rounded-md outline-none text-sm focus:ring-1 focus:ring-[#FA6338] transition-all"
+              className="w-full bg-[#F3F4F6] py-3.5 pl-32 pr-12 rounded-md outline-none text-sm focus:ring-1 focus:ring-[#9AE600] transition-all"
             />
             <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
           </div>
 
           <div className="flex items-center gap-4 lg:gap-6 text-[12px] text-gray-600 font-semibold whitespace-nowrap">
-            <div className="hidden xl:flex items-center gap-2 cursor-pointer hover:text-[#FA6338]">
-              <MapPin className="h-4 w-4 text-[#FA6338]" /> Dhaka, Bangladesh
+            <div className="hidden xl:flex items-center gap-2 cursor-pointer hover:text-[#9AE600]">
+              <MapPin className="h-4 w-4 text-[#9AE600]" /> Dhaka, Bangladesh
             </div>
-            <div className="hidden xl:flex items-center gap-2 underline cursor-pointer hover:text-[#FA6338]">
+            <div className="hidden xl:flex items-center gap-2 underline cursor-pointer hover:text-[#9AE600]">
               English - USD
             </div>
             <Link
               href={user ? "/profile" : "/auth?next=/profile"}
-              className="hidden sm:flex items-center gap-2 hover:text-[#FA6338]"
+              className="hidden sm:flex items-center gap-2 hover:text-[#9AE600]"
             >
               <User className="h-4 w-4" /> {user ? "Account" : "Sign up"}
             </Link>
             <Link href="/cart" className="relative flex items-center gap-2 group">
               <div className="relative">
-                <ShoppingCart className="h-6 w-6 text-[#FA6338]" />
+                <ShoppingCart className="h-6 w-6 text-[#9AE600]" />
                 {totalCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-[#FA6338] text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold border-2 border-white shadow-sm">
+                  <span className="absolute -top-2 -right-2 bg-[#9AE600] text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold border-2 border-white shadow-sm">
                     {totalCount}
                   </span>
                 )}
               </div>
-              <span className="text-sm font-bold group-hover:text-[#FA6338] hidden sm:block">
+              <span className="text-sm font-bold group-hover:text-[#9AE600] hidden sm:block">
                 Cart
               </span>
             </Link>
@@ -491,28 +491,28 @@ export default function ProductsClient() {
 
       <nav className="border-b border-gray-100 py-3.5 hidden lg:block">
         <div className="max-w-[1400px] mx-auto px-4 flex items-center gap-9 text-[14px] font-bold text-gray-700">
-          <Link href="/" className="text-[#FA6338]">
+          <Link href="/" className="text-[#9AE600]">
             Home
           </Link>
-          <Link href="#" className="flex items-center gap-1 hover:text-[#FA6338]">
+          <Link href="#" className="flex items-center gap-1 hover:text-[#9AE600]">
             Collections <ChevronDown className="h-4 w-4 opacity-50" />
           </Link>
-          <Link href="#" className="flex items-center gap-1 hover:text-[#FA6338]">
+          <Link href="#" className="flex items-center gap-1 hover:text-[#9AE600]">
             Pages <ChevronDown className="h-4 w-4 opacity-50" />
           </Link>
-          <Link href="#" className="hover:text-[#FA6338]">
+          <Link href="#" className="hover:text-[#9AE600]">
             Hot Offers
           </Link>
-          <Link href="#" className="flex items-center gap-1 hover:text-[#FA6338]">
+          <Link href="#" className="flex items-center gap-1 hover:text-[#9AE600]">
             Blog <ChevronDown className="h-4 w-4 opacity-50" />
           </Link>
-          <Link href="#" className="hover:text-[#FA6338]">
+          <Link href="#" className="hover:text-[#9AE600]">
             Contact
           </Link>
           <button
             type="button"
             onClick={resetFilters}
-            className="ml-auto flex items-center gap-2 text-gray-500 font-medium italic hover:text-[#FA6338]"
+            className="ml-auto flex items-center gap-2 text-gray-500 font-medium italic hover:text-[#9AE600]"
           >
             <RefreshCw className="h-4 w-4 rotate-45" /> Reset filters
           </button>
@@ -548,7 +548,7 @@ export default function ProductsClient() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search products..."
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:ring-1 focus:ring-[#FA6338]"
+                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:ring-1 focus:ring-[#9AE600]"
               />
             </div>
 
@@ -560,7 +560,7 @@ export default function ProductsClient() {
                 <button
                   type="button"
                   onClick={() => setSelectedCategory("All")}
-                  className="text-[12px] text-gray-400 hover:text-[#FA6338]"
+                  className="text-[12px] text-gray-400 hover:text-[#9AE600]"
                 >
                   Clear
                 </button>
@@ -575,9 +575,9 @@ export default function ProductsClient() {
                         setSelectedCategory(cat);
                         setIsMobileMenuOpen(false);
                       }}
-                      className={`w-full flex items-center justify-between px-0 py-3.5 hover:text-[#FA6338] transition-colors ${
+                      className={`w-full flex items-center justify-between px-0 py-3.5 hover:text-[#9AE600] transition-colors ${
                         selectedCategory === cat
-                          ? "text-[#FA6338] font-bold"
+                          ? "text-[#9AE600] font-bold"
                           : "text-gray-500 font-medium"
                       }`}
                     >
@@ -597,7 +597,7 @@ export default function ProductsClient() {
                 <button
                   type="button"
                   onClick={() => setPriceFilter("all")}
-                  className="text-[12px] text-gray-400 hover:text-[#FA6338]"
+                  className="text-[12px] text-gray-400 hover:text-[#9AE600]"
                 >
                   Clear
                 </button>
@@ -617,7 +617,7 @@ export default function ProductsClient() {
                     onClick={() => setPriceFilter(item.value as PriceFilter)}
                     className={`block w-full text-left rounded-xl px-3 py-2 text-sm transition-colors ${
                       priceFilter === item.value
-                        ? "bg-[#FA6338]/10 text-[#FA6338] font-bold"
+                        ? "bg-[#9AE600]/10 text-[#9AE600] font-bold"
                         : "text-gray-600 hover:bg-gray-50"
                     }`}
                   >
@@ -635,7 +635,7 @@ export default function ProductsClient() {
                 <button
                   type="button"
                   onClick={() => setAvailabilityFilter("all")}
-                  className="text-[12px] text-gray-400 hover:text-[#FA6338]"
+                  className="text-[12px] text-gray-400 hover:text-[#9AE600]"
                 >
                   Clear
                 </button>
@@ -655,7 +655,7 @@ export default function ProductsClient() {
                     }
                     className={`block w-full text-left rounded-xl px-3 py-2 text-sm transition-colors ${
                       availabilityFilter === item.value
-                        ? "bg-[#FA6338]/10 text-[#FA6338] font-bold"
+                        ? "bg-[#9AE600]/10 text-[#9AE600] font-bold"
                         : "text-gray-600 hover:bg-gray-50"
                     }`}
                   >
@@ -670,10 +670,10 @@ export default function ProductsClient() {
             <button
               type="button"
               onClick={resetFilters}
-              className="flex items-center justify-between font-bold text-[15px] px-2 text-gray-800 cursor-pointer hover:text-[#FA6338] transition-colors group w-full"
+              className="flex items-center justify-between font-bold text-[15px] px-2 text-gray-800 cursor-pointer hover:text-[#9AE600] transition-colors group w-full"
             >
               Reset all filters
-              <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-[#FA6338] transition-colors" />
+              <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-[#9AE600] transition-colors" />
             </button>
 
             <div className="pt-4 border-t border-gray-100">
@@ -701,7 +701,7 @@ export default function ProductsClient() {
             </div>
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="bg-[#FA6338] text-white p-3 rounded-md"
+              className="bg-[#9AE600] text-white p-3 rounded-md"
               type="button"
             >
               <SlidersHorizontal className="h-5 w-5" />
@@ -711,7 +711,7 @@ export default function ProductsClient() {
           <div className="flex justify-between items-center mb-6 lg:mb-10">
             <span className="text-gray-400 text-sm italic">
               Sort by:{" "}
-              <span className="text-black font-bold cursor-pointer hover:text-[#FA6338]">
+              <span className="text-black font-bold cursor-pointer hover:text-[#9AE600]">
                 Default
               </span>
             </span>
@@ -755,7 +755,7 @@ export default function ProductsClient() {
                             e.stopPropagation();
                             handleOpenReviews(product);
                           }}
-                          className="bg-white p-2.5 rounded-lg border border-gray-100 shadow-sm hover:bg-[#FA6338] hover:text-white transition-all"
+                          className="bg-white p-2.5 rounded-lg border border-gray-100 shadow-sm hover:bg-[#9AE600] hover:text-white transition-all"
                         >
                           <Heart className="h-4 w-4" />
                         </button>
@@ -766,7 +766,7 @@ export default function ProductsClient() {
                             e.stopPropagation();
                             handleSelectProduct(product);
                           }}
-                          className="bg-white p-2.5 rounded-lg border border-gray-100 shadow-sm hover:bg-[#FA6338] hover:text-white transition-all"
+                          className="bg-white p-2.5 rounded-lg border border-gray-100 shadow-sm hover:bg-[#9AE600] hover:text-white transition-all"
                         >
                           <Eye className="h-4 w-4" />
                         </button>
@@ -777,7 +777,7 @@ export default function ProductsClient() {
                             e.stopPropagation();
                             resetFilters();
                           }}
-                          className="bg-white p-2.5 rounded-lg border border-gray-100 shadow-sm hover:bg-[#FA6338] hover:text-white transition-all"
+                          className="bg-white p-2.5 rounded-lg border border-gray-100 shadow-sm hover:bg-[#9AE600] hover:text-white transition-all"
                         >
                           <RefreshCw className="h-4 w-4" />
                         </button>
@@ -809,7 +809,7 @@ export default function ProductsClient() {
 
                       <h3
                         onClick={() => handleSelectProduct(product)}
-                        className="text-[13px] lg:text-[14px] font-medium text-gray-800 line-clamp-2 leading-relaxed group-hover:text-[#FA6338] transition-colors"
+                        className="text-[13px] lg:text-[14px] font-medium text-gray-800 line-clamp-2 leading-relaxed group-hover:text-[#9AE600] transition-colors"
                       >
                         {productName}
                       </h3>
@@ -822,7 +822,7 @@ export default function ProductsClient() {
                         </div>
 
                         {qty > 0 ? (
-                          <div className="flex items-center justify-between bg-[#FA6338] text-white rounded-lg px-2 py-1.5 gap-2 lg:gap-3 shadow-md shadow-[#FA6338]/20 transition-all sm:w-auto w-full">
+                          <div className="flex items-center justify-between bg-[#9AE600] text-white rounded-lg px-2 py-1.5 gap-2 lg:gap-3 shadow-md shadow-[#9AE600]/20 transition-all sm:w-auto w-full">
                             <button
                               type="button"
                               onClick={(e) => {
@@ -852,7 +852,7 @@ export default function ProductsClient() {
                         ) : (
                           <button
                             onClick={(e) => handleAddToCart(e, product)}
-                            className="text-[11px] lg:text-[12px] font-extrabold border-2 border-gray-100 px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg hover:bg-[#FA6338] hover:border-[#FA6338] hover:text-white transition-all duration-300 sm:w-auto w-full text-center"
+                            className="text-[11px] lg:text-[12px] font-extrabold border-2 border-gray-100 px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg hover:bg-[#9AE600] hover:border-[#9AE600] hover:text-white transition-all duration-300 sm:w-auto w-full text-center"
                             type="button"
                           >
                             Add to cart
@@ -893,7 +893,7 @@ export default function ProductsClient() {
                       onClick={() => goToPage(item)}
                       className={`w-8 h-8 lg:w-10 lg:h-10 rounded-full font-black text-xs lg:text-sm border-2 transition-colors ${
                         currentPage === item
-                          ? "bg-[#FA6338]/10 text-[#FA6338] border-[#FA6338]/10"
+                          ? "bg-[#9AE600]/10 text-[#9AE600] border-[#9AE600]/10"
                           : "text-gray-500 border-transparent hover:bg-gray-50"
                       }`}
                     >
@@ -919,7 +919,7 @@ export default function ProductsClient() {
                 <div className="flex items-center gap-2">
                   <input
                     type="text"
-                    className="w-12 h-10 border border-gray-100 rounded-lg text-center font-bold outline-none focus:ring-1 focus:ring-[#FA6338]"
+                    className="w-12 h-10 border border-gray-100 rounded-lg text-center font-bold outline-none focus:ring-1 focus:ring-[#9AE600]"
                     value={pageJumpInput}
                     onChange={(e) => setPageJumpInput(e.target.value)}
                   />
@@ -988,7 +988,7 @@ export default function ProductsClient() {
                               prev === 0 ? images.length - 1 : prev - 1
                             )
                           }
-                          className="absolute left-3 top-1/2 -translate-y-1/2 bg-white hover:bg-[#FA6338] hover:text-white rounded-full p-2 shadow-md transition-colors"
+                          className="absolute left-3 top-1/2 -translate-y-1/2 bg-white hover:bg-[#9AE600] hover:text-white rounded-full p-2 shadow-md transition-colors"
                           type="button"
                         >
                           <ChevronLeft className="h-5 w-5" />
@@ -999,7 +999,7 @@ export default function ProductsClient() {
                               prev === images.length - 1 ? 0 : prev + 1
                             )
                           }
-                          className="absolute right-3 top-1/2 -translate-y-1/2 bg-white hover:bg-[#FA6338] hover:text-white rounded-full p-2 shadow-md transition-colors"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 bg-white hover:bg-[#9AE600] hover:text-white rounded-full p-2 shadow-md transition-colors"
                           type="button"
                         >
                           <ChevronRight className="h-5 w-5" />
@@ -1016,7 +1016,7 @@ export default function ProductsClient() {
                           onClick={() => setActiveImageIndex(index)}
                           className={`w-16 h-16 rounded-xl overflow-hidden border-2 transition-colors shrink-0 bg-[#F6F6F6] p-1 ${
                             activeImageIndex === index
-                              ? "border-[#FA6338]"
+                              ? "border-[#9AE600]"
                               : "border-transparent"
                           }`}
                           type="button"
@@ -1046,7 +1046,7 @@ export default function ProductsClient() {
                       <button
                         type="button"
                         onClick={() => setReviewModalProduct(selectedProduct)}
-                        className="text-xs font-bold text-gray-400 ml-2 hover:text-[#FA6338]"
+                        className="text-xs font-bold text-gray-400 ml-2 hover:text-[#9AE600]"
                       >
                         ({drawerReviews.length} Reviews)
                       </button>
@@ -1057,7 +1057,7 @@ export default function ProductsClient() {
                     </h1>
 
                     <div className="flex items-end gap-3">
-                      <p className="text-3xl font-black text-[#FA6338]">
+                      <p className="text-3xl font-black text-[#9AE600]">
                         ₵{getProductPrice(selectedProduct)}
                       </p>
                     </div>
@@ -1108,7 +1108,7 @@ export default function ProductsClient() {
 
                 <div className="px-6 py-5 border-t border-gray-100 bg-white shadow-[0_-10px_30px_rgba(0,0,0,0.03)] space-y-3">
                   {drawerQty > 0 ? (
-                    <div className="flex items-center justify-between bg-[#FA6338] text-white rounded-xl px-4 py-4 font-black">
+                    <div className="flex items-center justify-between bg-[#9AE600] text-white rounded-xl px-4 py-4 font-black">
                       <button
                         type="button"
                         onClick={() => decreaseQty(selectedProduct.id)}
@@ -1132,7 +1132,7 @@ export default function ProductsClient() {
                   ) : (
                     <button
                       onClick={(e) => handleAddToCart(e, selectedProduct)}
-                      className="w-full flex items-center justify-center gap-2 rounded-xl px-6 py-4 text-[15px] font-black transition-all bg-[#FA6338] text-white hover:bg-[#E55A32] shadow-lg shadow-[#FA6338]/30"
+                      className="w-full flex items-center justify-center gap-2 rounded-xl px-6 py-4 text-[15px] font-black transition-all bg-[#9AE600] text-white hover:bg-[#9AE600] shadow-lg shadow-[#9AE600]/30"
                       type="button"
                     >
                       <ShoppingBag className="h-5 w-5" />
@@ -1247,13 +1247,13 @@ export default function ProductsClient() {
                     value={reviewName}
                     onChange={(e) => setReviewName(e.target.value)}
                     placeholder="Your name"
-                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:ring-1 focus:ring-[#FA6338]"
+                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:ring-1 focus:ring-[#9AE600]"
                   />
 
                   <select
                     value={reviewRating}
                     onChange={(e) => setReviewRating(Number(e.target.value))}
-                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:ring-1 focus:ring-[#FA6338]"
+                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:ring-1 focus:ring-[#9AE600]"
                   >
                     <option value={5}>5 stars</option>
                     <option value={4}>4 stars</option>
@@ -1268,12 +1268,12 @@ export default function ProductsClient() {
                   onChange={(e) => setReviewText(e.target.value)}
                   placeholder="Write your review..."
                   rows={4}
-                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:ring-1 focus:ring-[#FA6338] resize-none"
+                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:ring-1 focus:ring-[#9AE600] resize-none"
                 />
 
                 <button
                   type="submit"
-                  className="w-full rounded-xl bg-[#FA6338] text-white py-3.5 font-bold hover:bg-[#E55A32] transition-colors"
+                  className="w-full rounded-xl bg-[#9AE600] text-white py-3.5 font-bold hover:bg-[#9AE600] transition-colors"
                 >
                   Submit Review
                 </button>

@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AMD Global Imports",
-  description: "Shop the best products at AMD Global Imports",
+  title: "AMN Global Imports",
+  description: "Shop the best products at AMN Global Imports",
 };
 
 export default function RootLayout({

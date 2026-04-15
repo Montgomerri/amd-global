@@ -351,8 +351,8 @@ export default function CheckoutPage() {
                   <span>₵{subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-500">
-                  <span>Shipping</span>
-                  <span className="text-green-600 font-medium">Free</span>
+                  <span>Delivery</span>
+                  <span className="text-green-600 font-medium">You will be informed when delivery is scheduled</span>
                 </div>
                 <div className="flex justify-between text-gray-500">
                   <span>Tax (1.5%)</span>

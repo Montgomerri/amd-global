@@ -122,7 +122,7 @@ export default function AuthClient() {
 
               <div className="mb-8">
                 <p className="text-sm font-semibold text-gray-900">
-                  AMD Global Imports
+                  AMN Global Imports
                 </p>
               </div>
 
