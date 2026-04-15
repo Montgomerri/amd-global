@@ -811,7 +811,7 @@ export default function ProductsClient() {
                         onClick={() => handleSelectProduct(product)}
                         className="text-[13px] lg:text-[14px] font-medium text-gray-800 line-clamp-2 leading-relaxed group-hover:text-[#FA6338] transition-colors"
                       >
-                        Summer Special Best Natural {productName}
+                        {productName}
                       </h3>
 
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 lg:pt-3">
