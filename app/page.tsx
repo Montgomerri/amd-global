@@ -59,11 +59,7 @@ const benefits = [
 ];
 
 const serviceCards = [
-  {
-    title: "Installation support",
-    text: "Optional setup and installation on selected appliances to make delivery day easier.",
-    icon: Wrench,
-  },
+
   {
     title: "Energy-saving picks",
     text: "Highlight efficient appliances and smart devices that reduce power use and running costs.",
