@@ -25,6 +25,8 @@ import {
   ShoppingCart,
   ChevronLeft,
   Menu,
+  Package,
+  LogOut,
 } from "lucide-react";
 import { useCart } from "@/lib/cartContext";
 import Link from "next/link";
@@ -46,9 +48,11 @@ export default function ProductsClient() {
   const { items, addItem, increaseQty, decreaseQty, totalCount } = useCart();
 
   const [products, setProducts] = useState<any[]>([]);
+  const [swellCategories, setSwellCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [user, setUser] = useState<any>(null);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -82,7 +86,7 @@ export default function ProductsClient() {
 
         const response = await swell.products.list({
           limit: 100,
-          expand: ["images"],
+          expand: ["images", "categories"],
         });
 
         setProducts(response.results || []);
@@ -95,6 +99,23 @@ export default function ProductsClient() {
     };
 
     fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await swell.categories.list({
+          limit: 50,
+        });
+
+        setSwellCategories(response.results || []);
+      } catch (err) {
+        console.error("Failed to load categories:", err);
+        setSwellCategories([]);
+      }
+    };
+
+    fetchCategories();
   }, []);
 
   useEffect(() => {
@@ -154,9 +175,7 @@ export default function ProductsClient() {
 
   useEffect(() => {
     if (reviewModalProduct) {
-      setReviewName(
-        user?.name || user?.first_name || user?.last_name || ""
-      );
+      setReviewName(user?.name || user?.first_name || user?.last_name || "");
       setReviewRating(5);
       setReviewText("");
     }
@@ -182,15 +201,18 @@ export default function ProductsClient() {
 
   const getProductPrice = (product: any) => Number(product?.price) || 0;
 
-  const getProductCategory = (product: any) => {
-    const category =
-      product?.category?.name ||
-      product?.categories?.[0]?.name ||
-      product?.category ||
-      product?.type ||
-      "Uncategorized";
+  const getProductCategorySlug = (product: any) => {
+    const firstCategory =
+      product?.categories?.[0] || product?.category || null;
 
-    return String(category);
+    return String(firstCategory?.slug || firstCategory?.name || "uncategorized").toLowerCase();
+  };
+
+  const getProductCategoryName = (product: any) => {
+    const firstCategory =
+      product?.categories?.[0] || product?.category || null;
+
+    return String(firstCategory?.name || firstCategory?.slug || "Uncategorized");
   };
 
   const isProductInStock = (product: any) => {
@@ -248,6 +270,16 @@ export default function ProductsClient() {
     });
   };
 
+  const handleLogout = async () => {
+    try {
+      await swell.account.logout();
+      setUser(null);
+      setAccountMenuOpen(false);
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
+  };
+
   const getItemQty = (id: string) => {
     return items.find((i) => i.id === id)?.quantity || 0;
   };
@@ -263,12 +295,27 @@ export default function ProductsClient() {
   };
 
   const categories = useMemo(() => {
-    const unique = Array.from(
-      new Set(products.map((product) => getProductCategory(product)))
-    ).filter(Boolean);
+    const apiCategories = swellCategories.map((cat) => ({
+      name: cat.name || "Uncategorized",
+      slug: String(cat.slug || cat.name || "uncategorized").toLowerCase(),
+    }));
 
-    return ["All", ...unique];
-  }, [products]);
+    const productCategories = Array.from(
+      new Set(products.map((product) => getProductCategoryName(product)))
+    )
+      .filter(Boolean)
+      .map((name) => ({
+        name,
+        slug: String(name).toLowerCase(),
+      }));
+
+    const merged = [...apiCategories, ...productCategories].filter(
+      (cat, index, self) =>
+        index === self.findIndex((c) => c.slug === cat.slug)
+    );
+
+    return [{ name: "All", slug: "all" }, ...merged];
+  }, [products, swellCategories]);
 
   const filteredProducts = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -276,7 +323,7 @@ export default function ProductsClient() {
     return products.filter((product) => {
       const name = getProductName(product).toLowerCase();
       const description = String(product?.description || "").toLowerCase();
-      const category = getProductCategory(product);
+      const categorySlug = getProductCategorySlug(product);
       const price = getProductPrice(product);
       const inStock = isProductInStock(product);
 
@@ -284,7 +331,9 @@ export default function ProductsClient() {
         !query || name.includes(query) || description.includes(query);
 
       const matchesCategory =
-        selectedCategory === "All" || category === selectedCategory;
+        selectedCategory === "All" ||
+        selectedCategory === "all" ||
+        categorySlug === selectedCategory.toLowerCase();
 
       const matchesPrice =
         priceFilter === "all" ||
@@ -433,9 +482,6 @@ export default function ProductsClient() {
               <Menu className="h-6 w-6 text-gray-800" />
             </button>
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 lg:w-9 lg:h-9 bg-[#9AE600] rounded-lg flex items-center justify-center text-white font-bold italic text-lg lg:text-xl">
-                
-              </div>
               <span className="text-xl lg:text-2xl font-bold tracking-tight hidden sm:block">
                 AMN GLOBAL
               </span>
@@ -461,17 +507,87 @@ export default function ProductsClient() {
 
           <div className="flex items-center gap-4 lg:gap-6 text-[12px] text-gray-600 font-semibold whitespace-nowrap">
             <div className="hidden xl:flex items-center gap-2 cursor-pointer hover:text-[#9AE600]">
-              <MapPin className="h-4 w-4 text-[#9AE600]" /> Dhaka, Bangladesh
+              <MapPin className="h-4 w-4 text-[#9AE600]" /> Accra, Ghana
             </div>
             <div className="hidden xl:flex items-center gap-2 underline cursor-pointer hover:text-[#9AE600]">
               English - USD
             </div>
-            <Link
-              href={user ? "/profile" : "/auth?next=/profile"}
-              className="hidden sm:flex items-center gap-2 hover:text-[#9AE600]"
-            >
-              <User className="h-4 w-4" /> {user ? "Account" : "Sign up"}
-            </Link>
+
+            {user ? (
+              <div className="relative hidden sm:block">
+                <button
+                  type="button"
+                  onClick={() => setAccountMenuOpen((prev) => !prev)}
+                  className="flex items-center gap-2 hover:text-[#9AE600] focus:outline-none"
+                >
+                  <span className="w-8 h-8 rounded-full bg-[#9AE600]/10 text-[#9AE600] flex items-center justify-center font-bold border border-[#9AE600]/20">
+                    {String(
+                      user?.name ||
+                        user?.first_name ||
+                        user?.email ||
+                        "U"
+                    )
+                      .trim()
+                      .charAt(0)
+                      .toUpperCase()}
+                  </span>
+                  <span>Account</span>
+                  <ChevronDown className="h-4 w-4" />
+                </button>
+
+                {accountMenuOpen && (
+                  <div className="absolute right-0 top-full mt-3 w-56 rounded-2xl border border-gray-100 bg-white shadow-xl overflow-hidden z-50">
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <p className="text-sm font-bold text-gray-900">
+                        {user?.name ||
+                          `${user?.first_name || ""} ${user?.last_name || ""}`.trim() ||
+                          "My Account"}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-0.5 truncate">
+                        {user?.email || ""}
+                      </p>
+                    </div>
+
+                    <div className="p-2">
+                      <Link
+                        href="/orders"
+                        onClick={() => setAccountMenuOpen(false)}
+                        className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-[#9AE600] transition-colors"
+                      >
+                        <Package className="h-4 w-4" />
+                        My Orders
+                      </Link>
+
+                      <Link
+                        href="/profile"
+                        onClick={() => setAccountMenuOpen(false)}
+                        className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-[#9AE600] transition-colors"
+                      >
+                        <User className="h-4 w-4" />
+                        My Profile
+                      </Link>
+
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-red-600 transition-colors text-left"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Logout
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                href="/auth?next=/profile"
+                className="hidden sm:flex items-center gap-2 hover:text-[#9AE600]"
+              >
+                <User className="h-4 w-4" /> Sign up
+              </Link>
+            )}
+
             <Link href="/cart" className="relative flex items-center gap-2 group">
               <div className="relative">
                 <ShoppingCart className="h-6 w-6 text-[#9AE600]" />
@@ -490,25 +606,21 @@ export default function ProductsClient() {
       </header>
 
       <nav className="border-b border-gray-100 py-3.5 hidden lg:block">
-        <div className="max-w-[1400px] mx-auto px-4 flex items-center gap-9 text-[14px] font-bold text-gray-700">
-          <Link href="/" className="text-[#9AE600]">
-            Home
-          </Link>
-          <Link href="#" className="flex items-center gap-1 hover:text-[#9AE600]">
-            Collections <ChevronDown className="h-4 w-4 opacity-50" />
-          </Link>
-          <Link href="#" className="flex items-center gap-1 hover:text-[#9AE600]">
-            Pages <ChevronDown className="h-4 w-4 opacity-50" />
-          </Link>
-          <Link href="#" className="hover:text-[#9AE600]">
-            Hot Offers
-          </Link>
-          <Link href="#" className="flex items-center gap-1 hover:text-[#9AE600]">
-            Blog <ChevronDown className="h-4 w-4 opacity-50" />
-          </Link>
-          <Link href="#" className="hover:text-[#9AE600]">
-            Contact
-          </Link>
+        <div className="max-w-[1400px] mx-auto px-4 flex items-center gap-5 text-[14px] font-bold text-gray-700 overflow-x-auto">
+          {categories.map((cat) => (
+            <button
+              key={cat.slug}
+              type="button"
+              onClick={() => setSelectedCategory(cat.slug === "all" ? "All" : cat.slug)}
+              className={`whitespace-nowrap flex items-center gap-1 hover:text-[#9AE600] transition-colors ${
+                (selectedCategory === cat.slug ||
+                  (cat.slug === "all" && selectedCategory === "All")) &&
+                "text-[#9AE600]"
+              }`}
+            >
+              {cat.name}
+            </button>
+          ))}
           <button
             type="button"
             onClick={resetFilters}
@@ -568,20 +680,21 @@ export default function ProductsClient() {
 
               <ul className="text-[14px] max-h-64 overflow-y-auto pr-1">
                 {categories.map((cat) => (
-                  <li key={cat}>
+                  <li key={cat.slug}>
                     <button
                       type="button"
                       onClick={() => {
-                        setSelectedCategory(cat);
+                        setSelectedCategory(cat.slug === "all" ? "All" : cat.slug);
                         setIsMobileMenuOpen(false);
                       }}
                       className={`w-full flex items-center justify-between px-0 py-3.5 hover:text-[#9AE600] transition-colors ${
-                        selectedCategory === cat
+                        selectedCategory === cat.slug ||
+                        (cat.slug === "all" && selectedCategory === "All")
                           ? "text-[#9AE600] font-bold"
                           : "text-gray-500 font-medium"
                       }`}
                     >
-                      <span>{cat}</span>
+                      <span>{cat.name}</span>
                       <ChevronRight className="h-4 w-4 text-gray-300" />
                     </button>
                   </li>
