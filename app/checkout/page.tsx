@@ -12,13 +12,39 @@ import {
 } from "lucide-react";
 import { useCart } from "@/lib/cartContext";
 import Link from "next/link";
-import swell from "@/lib/swell";
 
 declare global {
   interface Window {
     PaystackPop: any;
   }
 }
+
+type CheckoutItem = {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  image: string;
+};
+
+type StoredOrder = {
+  id: string;
+  reference: string;
+  items: CheckoutItem[];
+  subtotal: number;
+  tax: number;
+  total: number;
+  status: "order_placed";
+  createdAt: number;
+  email: string;
+  address: string;
+  state: string;
+  city: string;
+  paymentMethod: "paystack";
+};
+
+const ORDERS_STORAGE_KEY = "amd-orders";
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
 export default function CheckoutPage() {
   const { items, removeItem, clearCart } = useCart();
@@ -52,44 +78,77 @@ export default function CheckoutPage() {
       document.body.appendChild(script);
     });
 
-  const submitOrderToSwell = (transaction: any) => {
+  const readStoredOrders = (): StoredOrder[] => {
+    if (typeof window === "undefined") return [];
+
+    try {
+      const raw = localStorage.getItem(ORDERS_STORAGE_KEY);
+      if (!raw) return [];
+
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+
+      const now = Date.now();
+
+      const validOrders = parsed.filter((order: StoredOrder) => {
+        const createdAt = Number(order?.createdAt || 0);
+        return createdAt && now - createdAt < THIRTY_DAYS_MS;
+      });
+
+      if (validOrders.length !== parsed.length) {
+        localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(validOrders));
+      }
+
+      return validOrders;
+    } catch {
+      return [];
+    }
+  };
+
+  const saveOrder = (order: StoredOrder) => {
+    if (typeof window === "undefined") return;
+
+    const existingOrders = readStoredOrders();
+    localStorage.setItem(
+      ORDERS_STORAGE_KEY,
+      JSON.stringify([order, ...existingOrders])
+    );
+  };
+
+  const submitOrderToLocalStorage = (transaction: any) => {
     setProcessing(true);
 
-    swell.cart
-      .setItems(
-        items.map((item) => ({
-          product_id: item.id,
+    try {
+      const order: StoredOrder = {
+        id: transaction?.reference || `${Date.now()}`,
+        reference: transaction?.reference || `${Date.now()}`,
+        items: items.map((item) => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
           quantity: item.quantity,
-        }))
-      )
-      .then(() =>
-        swell.cart.update({
-          billing: {
-            method: "paystack",
-            email: form.email,
-            address1: form.address,
-            city: form.city,
-            state: form.state,
-            country: "GH",
-          },
-          shipping: {
-            address1: form.address,
-            city: form.city,
-            state: form.state,
-            country: "GH",
-          },
-        })
-      )
-      .then(() => swell.cart.submitOrder())
-      .then((order: any) => {
-        clearCart();
-        window.location.href = `/success?ref=${transaction.reference}&order=${order?.number || ""}`;
-      })
-      .catch((err: any) => {
-        console.error("Order submission error:", err);
-        clearCart();
-        window.location.href = `/success?ref=${transaction.reference}`;
-      });
+          image: item.image,
+        })),
+        subtotal,
+        tax,
+        total,
+        status: "order_placed",
+        createdAt: Date.now(),
+        email: form.email,
+        address: form.address,
+        state: form.state,
+        city: form.city,
+        paymentMethod: "paystack",
+      };
+
+      saveOrder(order);
+      clearCart();
+      window.location.href = `/success?ref=${transaction?.reference || ""}&order=${transaction?.reference || ""}`;
+    } catch (err) {
+      console.error("Order saving error:", err);
+      clearCart();
+      window.location.href = `/success?ref=${transaction?.reference || ""}`;
+    }
   };
 
   const handlePayment = async () => {
@@ -110,7 +169,7 @@ export default function CheckoutPage() {
         amount: Math.round(total * 100),
         currency: "GHS",
         callback: function (transaction: any) {
-          submitOrderToSwell(transaction);
+          submitOrderToLocalStorage(transaction);
         },
         onClose: function () {},
       });
@@ -352,7 +411,9 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex justify-between text-gray-500">
                   <span>Delivery</span>
-                  <span className="text-green-600 font-medium">You will be informed when delivery is scheduled</span>
+                  <span className="text-green-600 font-medium">
+                    You will be informed when delivery is scheduled
+                  </span>
                 </div>
                 <div className="flex justify-between text-gray-500">
                   <span>Tax (1.5%)</span>
