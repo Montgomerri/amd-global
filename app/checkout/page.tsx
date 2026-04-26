@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useCart } from "@/lib/cartContext";
 import Link from "next/link";
+import swell from "@/lib/swell";
 
 declare global {
   interface Window {
@@ -74,7 +75,8 @@ export default function CheckoutPage() {
       script.src = "https://js.paystack.co/v1/inline.js";
       script.async = true;
       script.onload = () => resolve();
-      script.onerror = () => reject(new Error("Paystack script failed to load"));
+      script.onerror = () =>
+        reject(new Error("Paystack script failed to load"));
       document.body.appendChild(script);
     });
 
@@ -116,8 +118,6 @@ export default function CheckoutPage() {
   };
 
   const submitOrderToLocalStorage = (transaction: any) => {
-    setProcessing(true);
-
     try {
       const order: StoredOrder = {
         id: transaction?.reference || `${Date.now()}`,
@@ -143,12 +143,36 @@ export default function CheckoutPage() {
 
       saveOrder(order);
       clearCart();
-      window.location.href = `/success?ref=${transaction?.reference || ""}&order=${transaction?.reference || ""}`;
+      window.location.href = `/success?ref=${transaction?.reference || ""}&order=${transaction?.reference || ""
+        }`;
     } catch (err) {
       console.error("Order saving error:", err);
       clearCart();
       window.location.href = `/success?ref=${transaction?.reference || ""}`;
     }
+  };
+
+  const syncLocalCartToSwell = async () => {
+    // This copies your custom cart into Swell so Swell can convert it to a real order.
+    // IMPORTANT: item.id must be the actual Swell product_id.
+    await swell.cart.setItems(
+      items.map((item) => ({
+        product_id: item.id,
+        quantity: item.quantity,
+      }))
+    );
+
+    await swell.cart.update({
+      account: {
+        email: form.email,
+      },
+      shipping: {
+        address1: form.address,
+        city: form.city,
+        state: form.state,
+        country: "GH",
+      },
+    });
   };
 
   const handlePayment = async () => {
@@ -168,8 +192,23 @@ export default function CheckoutPage() {
         email: form.email,
         amount: Math.round(total * 100),
         currency: "GHS",
-        callback: function (transaction: any) {
-          submitOrderToLocalStorage(transaction);
+        callback: async function (transaction: any) {
+          setProcessing(true);
+
+          try {
+            await syncLocalCartToSwell();
+
+            const swellOrder = await swell.cart.submitOrder();
+            console.log("Swell order created:", swellOrder);
+
+            submitOrderToLocalStorage(transaction);
+          } catch (err) {
+            console.error("Swell order error:", err);
+            setProcessing(false);
+            alert(
+              "Payment succeeded, but the order could not be created in Swell."
+            );
+          }
         },
         onClose: function () {},
       });
