@@ -11,7 +11,6 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { useCart } from "@/lib/cartContext";
-import Link from "next/link";
 import swell from "@/lib/swell";
 
 declare global {
@@ -27,25 +26,6 @@ type CheckoutItem = {
   quantity: number;
   image: string;
 };
-
-type StoredOrder = {
-  id: string;
-  reference: string;
-  items: CheckoutItem[];
-  subtotal: number;
-  tax: number;
-  total: number;
-  status: "order_placed";
-  createdAt: number;
-  email: string;
-  address: string;
-  state: string;
-  city: string;
-  paymentMethod: "paystack";
-};
-
-const ORDERS_STORAGE_KEY = "amd-orders";
-const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
 export default function CheckoutPage() {
   const { items, removeItem, clearCart } = useCart();
@@ -70,91 +50,43 @@ export default function CheckoutPage() {
 
   const loadPaystack = () =>
     new Promise<void>((resolve, reject) => {
+      if (typeof window === "undefined") {
+        reject(new Error("Window is undefined"));
+        return;
+      }
+
       if (window.PaystackPop) return resolve();
+
+      const existingScript = document.querySelector(
+        'script[src="https://js.paystack.co/v1/inline.js"]'
+      );
+
+      if (existingScript) {
+        existingScript.addEventListener("load", () => resolve(), { once: true });
+        existingScript.addEventListener(
+          "error",
+          () => reject(new Error("Paystack script failed to load")),
+          { once: true }
+        );
+        return;
+      }
+
       const script = document.createElement("script");
       script.src = "https://js.paystack.co/v1/inline.js";
       script.async = true;
-      script.onload = () => resolve();
-      script.onerror = () =>
-        reject(new Error("Paystack script failed to load"));
+
+      script.onload = () => {
+        if (window.PaystackPop) resolve();
+        else reject(new Error("Paystack loaded but PaystackPop is unavailable"));
+      };
+
+      script.onerror = () => reject(new Error("Paystack script failed to load"));
+
       document.body.appendChild(script);
     });
 
-  const readStoredOrders = (): StoredOrder[] => {
-    if (typeof window === "undefined") return [];
-
-    try {
-      const raw = localStorage.getItem(ORDERS_STORAGE_KEY);
-      if (!raw) return [];
-
-      const parsed = JSON.parse(raw);
-      if (!Array.isArray(parsed)) return [];
-
-      const now = Date.now();
-
-      const validOrders = parsed.filter((order: StoredOrder) => {
-        const createdAt = Number(order?.createdAt || 0);
-        return createdAt && now - createdAt < THIRTY_DAYS_MS;
-      });
-
-      if (validOrders.length !== parsed.length) {
-        localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(validOrders));
-      }
-
-      return validOrders;
-    } catch {
-      return [];
-    }
-  };
-
-  const saveOrder = (order: StoredOrder) => {
-    if (typeof window === "undefined") return;
-
-    const existingOrders = readStoredOrders();
-    localStorage.setItem(
-      ORDERS_STORAGE_KEY,
-      JSON.stringify([order, ...existingOrders])
-    );
-  };
-
-  const submitOrderToLocalStorage = (transaction: any) => {
-    try {
-      const order: StoredOrder = {
-        id: transaction?.reference || `${Date.now()}`,
-        reference: transaction?.reference || `${Date.now()}`,
-        items: items.map((item) => ({
-          id: item.id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          image: item.image,
-        })),
-        subtotal,
-        tax,
-        total,
-        status: "order_placed",
-        createdAt: Date.now(),
-        email: form.email,
-        address: form.address,
-        state: form.state,
-        city: form.city,
-        paymentMethod: "paystack",
-      };
-
-      saveOrder(order);
-      clearCart();
-      window.location.href = `/success?ref=${transaction?.reference || ""}&order=${transaction?.reference || ""
-        }`;
-    } catch (err) {
-      console.error("Order saving error:", err);
-      clearCart();
-      window.location.href = `/success?ref=${transaction?.reference || ""}`;
-    }
-  };
-
-  const syncLocalCartToSwell = async () => {
-    // This copies your custom cart into Swell so Swell can convert it to a real order.
-    // IMPORTANT: item.id must be the actual Swell product_id.
+  const syncCartToSwell = async () => {
+    // Important: item.id must be the real Swell product ID.
     await swell.cart.setItems(
       items.map((item) => ({
         product_id: item.id,
@@ -196,12 +128,16 @@ export default function CheckoutPage() {
           setProcessing(true);
 
           try {
-            await syncLocalCartToSwell();
+            await syncCartToSwell();
 
-            const swellOrder = await swell.cart.submitOrder();
-            console.log("Swell order created:", swellOrder);
+            const order = await swell.cart.submitOrder();
+            console.log("Swell order created:", order);
 
-            submitOrderToLocalStorage(transaction);
+            clearCart();
+
+            window.location.href = `/success?ref=${
+              transaction?.reference || ""
+            }&order=${order?.id || transaction?.reference || ""}`;
           } catch (err) {
             console.error("Swell order error:", err);
             setProcessing(false);
@@ -210,12 +146,15 @@ export default function CheckoutPage() {
             );
           }
         },
-        onClose: function () {},
+        onClose: function () {
+          setProcessing(false);
+        },
       });
 
       handler.openIframe();
     } catch (err) {
       console.error("EXACT ERROR:", err);
+      setProcessing(false);
       alert("Payment system failed to load. Please try again.");
     }
   };
@@ -408,9 +347,7 @@ export default function CheckoutPage() {
                   <h3 className="text-lg font-semibold text-gray-900">
                     Discount code
                   </h3>
-                  <p className="text-sm text-gray-400">
-                    Add a code if you have one.
-                  </p>
+                  <p className="text-sm text-gray-400">Add a code if you have one.</p>
                 </div>
               </div>
 
