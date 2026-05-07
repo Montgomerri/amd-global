@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import {
   ShoppingBag,
@@ -10,6 +10,7 @@ import {
   CalendarDays,
   MapPin,
   BadgeCheck,
+  Search,
 } from "lucide-react";
 
 type OrderItem = {
@@ -20,108 +21,80 @@ type OrderItem = {
   image: string;
 };
 
-type StoredOrder = {
+type Order = {
   id: string;
   reference: string;
   items: OrderItem[];
   subtotal: number;
   tax: number;
   total: number;
-  status: "order_placed";
-  createdAt: number;
+  status: string;
+  created_at: string;
   email: string;
   address: string;
   state: string;
   city: string;
-  paymentMethod: "paystack";
+  payment_method: string;
 };
 
-const ORDERS_STORAGE_KEY = "amd-orders";
-const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
-
 export default function OrdersPage() {
-  const [orders, setOrders] = useState<StoredOrder[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [email, setEmail] = useState("");
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searched, setSearched] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    const fetchOrders = () => {
-      try {
-        if (typeof window === "undefined") {
-          setOrders([]);
-          return;
-        }
+  const fetchOrders = async () => {
+    if (!email) return alert("Please enter your email");
 
-        const raw = localStorage.getItem(ORDERS_STORAGE_KEY);
-        const parsed = raw ? JSON.parse(raw) : [];
+    setLoading(true);
+    setError("");
+    setSearched(false);
 
-        if (!Array.isArray(parsed)) {
-          setOrders([]);
-          setLoading(false);
-          return;
-        }
+    try {
+      const res = await fetch(`/api/get-orders?email=${encodeURIComponent(email)}`);
+      const data = await res.json();
 
-        const now = Date.now();
-
-        const validOrders = parsed.filter((order: StoredOrder) => {
-          const createdAt = Number(order?.createdAt || 0);
-          return createdAt && now - createdAt < THIRTY_DAYS_MS;
-        });
-
-        if (validOrders.length !== parsed.length) {
-          localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(validOrders));
-        }
-
-        validOrders.sort((a, b) => b.createdAt - a.createdAt);
-
-        setOrders(validOrders);
-      } catch (err) {
-        setError("Failed to load orders. Please try again.");
-      } finally {
-        setLoading(false);
+      if (data.success) {
+        setOrders(data.orders);
+        setSearched(true);
+      } else {
+        setError(data.error || "Failed to load orders.");
       }
-    };
-
-    fetchOrders();
-  }, []);
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
-      case "order_placed":
-        return "bg-green-100 text-green-700";
-      case "complete":
-        return "bg-green-100 text-green-700";
-      case "pending":
-        return "bg-yellow-100 text-yellow-700";
-      case "cancelled":
-        return "bg-red-100 text-red-600";
-      case "payment_pending":
-        return "bg-blue-100 text-blue-700";
-      default:
-        return "bg-gray-100 text-gray-600";
+      case "order_placed": return "bg-green-100 text-green-700";
+      case "complete": return "bg-green-100 text-green-700";
+      case "pending": return "bg-yellow-100 text-yellow-700";
+      case "cancelled": return "bg-red-100 text-red-600";
+      case "payment_pending": return "bg-blue-100 text-blue-700";
+      default: return "bg-gray-100 text-gray-600";
     }
   };
 
   const getStatusLabel = (status: string) => {
     switch (status?.toLowerCase()) {
-      case "order_placed":
-        return "Order Placed";
-      case "complete":
-        return "Completed";
-      case "pending":
-        return "Pending";
-      case "cancelled":
-        return "Cancelled";
-      case "payment_pending":
-        return "Payment Pending";
-      default:
-        return status || "Processing";
+      case "order_placed": return "Order Placed";
+      case "complete": return "Completed";
+      case "pending": return "Pending";
+      case "cancelled": return "Cancelled";
+      case "payment_pending": return "Payment Pending";
+      default: return status || "Processing";
     }
   };
 
   return (
     <main className="min-h-screen bg-gray-50 font-sans">
       <div className="max-w-3xl mx-auto px-4 py-10">
+
+        {/* Header */}
         <div className="flex items-center gap-3 mb-8">
           <Link href="/products" className="p-2 rounded-full hover:bg-gray-200 transition">
             <ArrowLeft className="h-4 w-4 text-gray-500" />
@@ -132,24 +105,50 @@ export default function OrdersPage() {
           </div>
         </div>
 
-        {loading && (
-          <div className="flex items-center justify-center py-24">
-            <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+        {/* Email Search */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-6">
+          <p className="text-sm font-semibold text-gray-700 mb-3">
+            Enter the email you used at checkout
+          </p>
+          <div className="flex gap-2">
+            <input
+              type="email"
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && fetchOrders()}
+              className="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-[#9AE600] transition"
+            />
+            <button
+              onClick={fetchOrders}
+              disabled={loading}
+              className="flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm text-gray-900 disabled:opacity-60 transition hover:opacity-90"
+              style={{ backgroundColor: "#9AE600" }}
+            >
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Search className="h-4 w-4" />
+              )}
+              Search
+            </button>
           </div>
-        )}
+        </div>
 
+        {/* Error */}
         {error && (
-          <div className="bg-red-50 border border-red-100 text-red-500 rounded-2xl p-6 text-center text-sm">
+          <div className="bg-red-50 border border-red-100 text-red-500 rounded-2xl p-6 text-center text-sm mb-4">
             {error}
           </div>
         )}
 
-        {!loading && !error && orders.length === 0 && (
+        {/* No orders found */}
+        {searched && !loading && orders.length === 0 && (
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-16 text-center">
             <Package className="h-12 w-12 text-gray-200 mx-auto mb-4" />
-            <p className="text-gray-500 font-semibold">No orders yet</p>
+            <p className="text-gray-500 font-semibold">No orders found</p>
             <p className="text-sm text-gray-400 mt-1">
-              When you place an order, it will appear here.
+              No orders found for <span className="font-semibold">{email}</span>
             </p>
             <Link
               href="/products"
@@ -162,6 +161,7 @@ export default function OrdersPage() {
           </div>
         )}
 
+        {/* Orders list */}
         {!loading && orders.length > 0 && (
           <div className="space-y-4">
             {orders.map((order) => (
@@ -173,8 +173,8 @@ export default function OrdersPage() {
                     </p>
                     <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
                       <CalendarDays className="h-3.5 w-3.5" />
-                      {order.createdAt
-                        ? new Date(order.createdAt).toLocaleDateString("en-GH", {
+                      {order.created_at
+                        ? new Date(order.created_at).toLocaleDateString("en-GH", {
                             year: "numeric",
                             month: "long",
                             day: "numeric",
@@ -183,11 +183,7 @@ export default function OrdersPage() {
                     </p>
                   </div>
 
-                  <span
-                    className={`text-xs font-semibold px-3 py-1 rounded-full ${getStatusColor(
-                      order.status
-                    )}`}
-                  >
+                  <span className={`text-xs font-semibold px-3 py-1 rounded-full ${getStatusColor(order.status)}`}>
                     {getStatusLabel(order.status)}
                   </span>
                 </div>
@@ -223,7 +219,7 @@ export default function OrdersPage() {
                   ))}
 
                   {order.items?.length > 3 && (
-                    <p className="text-xs text-gray-400 pl-15">
+                    <p className="text-xs text-gray-400">
                       +{order.items.length - 3} more items
                     </p>
                   )}
@@ -241,12 +237,12 @@ export default function OrdersPage() {
                     {order.city || order.address ? (
                       <>
                         <MapPin className="h-3.5 w-3.5" />
-                        Delivered to {order.city || order.state || "Ghana"}
+                        {order.city || order.state || "Ghana"}
                       </>
                     ) : (
                       <>
                         <BadgeCheck className="h-3.5 w-3.5" />
-                        Saved locally for 30 days
+                        Order confirmed
                       </>
                     )}
                   </div>

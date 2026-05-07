@@ -11,7 +11,6 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { useCart } from "@/lib/cartContext";
-import Link from "next/link";
 
 declare global {
   interface Window {
@@ -27,25 +26,6 @@ type CheckoutItem = {
   image: string;
 };
 
-type StoredOrder = {
-  id: string;
-  reference: string;
-  items: CheckoutItem[];
-  subtotal: number;
-  tax: number;
-  total: number;
-  status: "order_placed";
-  createdAt: number;
-  email: string;
-  address: string;
-  state: string;
-  city: string;
-  paymentMethod: "paystack";
-};
-
-const ORDERS_STORAGE_KEY = "amd-orders";
-const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
-
 export default function CheckoutPage() {
   const { items, removeItem, clearCart } = useCart();
   const [processing, setProcessing] = useState(false);
@@ -53,6 +33,7 @@ export default function CheckoutPage() {
 
   const [form, setForm] = useState({
     email: "",
+    phone: "",
     address: "",
     state: "",
     city: "",
@@ -78,90 +59,38 @@ export default function CheckoutPage() {
       document.body.appendChild(script);
     });
 
-  const readStoredOrders = (): StoredOrder[] => {
-    if (typeof window === "undefined") return [];
-
-    try {
-      const raw = localStorage.getItem(ORDERS_STORAGE_KEY);
-      if (!raw) return [];
-
-      const parsed = JSON.parse(raw);
-      if (!Array.isArray(parsed)) return [];
-
-      const now = Date.now();
-
-      const validOrders = parsed.filter((order: StoredOrder) => {
-        const createdAt = Number(order?.createdAt || 0);
-        return createdAt && now - createdAt < THIRTY_DAYS_MS;
-      });
-
-      if (validOrders.length !== parsed.length) {
-        localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(validOrders));
-      }
-
-      return validOrders;
-    } catch {
-      return [];
-    }
-  };
-
-  const saveOrder = (order: StoredOrder) => {
-    if (typeof window === "undefined") return;
-
-    const existingOrders = readStoredOrders();
-    localStorage.setItem(
-      ORDERS_STORAGE_KEY,
-      JSON.stringify([order, ...existingOrders])
-    );
-  };
-
-  const submitOrderToLocalStorage = (transaction: any) => {
-    setProcessing(true);
-
-    try {
-      const order: StoredOrder = {
-        id: transaction?.reference || `${Date.now()}`,
-        reference: transaction?.reference || `${Date.now()}`,
-        items: items.map((item) => ({
-          id: item.id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          image: item.image,
-        })),
-        subtotal,
-        tax,
-        total,
-        status: "order_placed",
-        createdAt: Date.now(),
-        email: form.email,
-        address: form.address,
-        state: form.state,
-        city: form.city,
-        paymentMethod: "paystack",
-      };
-
-      saveOrder(order);
-      clearCart();
-      window.location.href = `/success?ref=${transaction?.reference || ""}&order=${transaction?.reference || ""}`;
-    } catch (err) {
-      console.error("Order saving error:", err);
-      clearCart();
-      window.location.href = `/success?ref=${transaction?.reference || ""}`;
-    }
-  };
-
   const handlePayment = async () => {
     if (!form.email) return alert("Please enter your email");
+    if (!form.phone) return alert("Please enter your phone number");
     if (!form.address) return alert("Please enter your delivery address");
     if (items.length === 0) return alert("Your cart is empty");
 
     try {
       await loadPaystack();
 
-      if (!window.PaystackPop) {
-        throw new Error("Paystack not available on window");
-      }
+      if (!window.PaystackPop) throw new Error("Paystack not available");
+
+      // Save order data BEFORE Paystack opens
+      sessionStorage.setItem(
+        "pending-order",
+        JSON.stringify({
+          items: items.map((item) => ({
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            image: item.image,
+          })),
+          subtotal,
+          tax,
+          total,
+          email: form.email,
+          phone: form.phone,
+          address: form.address,
+          city: form.city,
+          state: form.state,
+        })
+      );
 
       const handler = window.PaystackPop.setup({
         key: "pk_live_9b66796f63600a703d0b0d707d5d766b8179ed42",
@@ -169,7 +98,8 @@ export default function CheckoutPage() {
         amount: Math.round(total * 100),
         currency: "GHS",
         callback: function (transaction: any) {
-          submitOrderToLocalStorage(transaction);
+          clearCart();
+          window.location.href = `/success?ref=${transaction.reference}`;
         },
         onClose: function () {},
       });
@@ -237,6 +167,13 @@ export default function CheckoutPage() {
                     className="w-full border border-gray-200 rounded-xl px-3 py-3 text-sm outline-none focus:border-[#9AE600] transition"
                     value={form.email}
                     onChange={(e) => update("email", e.target.value)}
+                  />
+                  <input
+                    type="tel"
+                    placeholder="Phone number"
+                    className="w-full border border-gray-200 rounded-xl px-3 py-3 text-sm outline-none focus:border-[#9AE600] transition"
+                    value={form.phone}
+                    onChange={(e) => update("phone", e.target.value)}
                   />
                   <input
                     placeholder="Delivery address"
@@ -446,4 +383,4 @@ export default function CheckoutPage() {
       </div>
     </main>
   );
-} 
+}

@@ -514,7 +514,7 @@ export default function ProductsClient() {
             </div>
 
             {user ? (
-              <div className="relative hidden sm:block">
+              <div className="relative">
                 <button
                   type="button"
                   onClick={() => setAccountMenuOpen((prev) => !prev)}
@@ -531,8 +531,8 @@ export default function ProductsClient() {
                       .charAt(0)
                       .toUpperCase()}
                   </span>
-                  <span>Account</span>
-                  <ChevronDown className="h-4 w-4" />
+                  <span className="hidden sm:inline">Account</span>
+<ChevronDown className="hidden sm:inline h-4 w-4" />
                 </button>
 
                 {accountMenuOpen && (
@@ -582,9 +582,10 @@ export default function ProductsClient() {
             ) : (
               <Link
                 href="/auth?next=/profile"
-                className="hidden sm:flex items-center gap-2 hover:text-[#9AE600]"
+                className="flex items-center gap-2 hover:text-[#9AE600]"
               >
-                <User className="h-4 w-4" /> Sign up
+                <User className="h-4 w-4" />
+<span className="hidden sm:inline">Sign up</span>
               </Link>
             )}
 
@@ -823,9 +824,9 @@ export default function ProductsClient() {
 
           <div className="flex justify-between items-center mb-6 lg:mb-10">
             <span className="text-gray-400 text-sm italic">
-              Sort by:{" "}
+              Premium imports,
               <span className="text-black font-bold cursor-pointer hover:text-[#9AE600]">
-                Default
+                delivered to you
               </span>
             </span>
             <span className="text-sm font-bold text-gray-600 hidden sm:block">
