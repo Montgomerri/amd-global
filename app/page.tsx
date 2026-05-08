@@ -337,8 +337,8 @@ export default function Page() {
         <div className="flex flex-col sm:flex-row gap-6 items-start mb-8">
 
           {/* Founder photo — small and fixed */}
-          <div className="relative shrink-0 w-[140px] sm:w-[160px]">
-            <div className="w-full h-[190px] sm:h-[210px] overflow-hidden rounded-[16px]">
+          <div className="relative shrink-0 w-[180px] sm:w-[220px]">
+            <div className="w-full h-[240px] sm:h-[280px] overflow-hidden rounded-[16px]">
               <img
                 src="/founder.jpg.png"
                 alt="Albertha Nana Aba Boateng"
