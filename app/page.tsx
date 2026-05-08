@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  ArrowRight, BadgeCheck, CalendarClock, Check, ChevronRight,
+  ArrowRight, BadgeCheck, CalendarClock, ChevronRight,
   Headphones, PlugZap, ShieldCheck, ShoppingBag, Star, Truck,
   Zap, WashingMachine, Refrigerator, Tv, Fan, Microwave,
   AirVent, Smartphone, Lightbulb, CreditCard, X, Mail, Phone,
@@ -67,7 +67,15 @@ function Modal({ open, onClose, title, children }: { open: boolean; onClose: () 
   );
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
+function SectionLabel({ children, light }: { children: React.ReactNode; light?: boolean }) {
+  if (light) {
+    return (
+      <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-medium uppercase tracking-[0.18em] text-white/70 shadow-sm">
+        <span className="h-2 w-2 rounded-full bg-lime-400" />
+        {children}
+      </div>
+    );
+  }
   return (
     <div className="inline-flex items-center gap-2 rounded-full border border-zinc-900/10 bg-white px-4 py-2 text-xs font-medium uppercase tracking-[0.18em] text-zinc-600 shadow-sm">
       <span className="h-2 w-2 rounded-full bg-lime-500" />
@@ -78,12 +86,12 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 function BenefitCard({ icon: Icon, title, text }: { icon: React.ElementType; title: string; text: string }) {
   return (
-    <div className="rounded-[24px] bg-white p-6 shadow-[0_18px_40px_rgba(15,23,42,0.07)] ring-1 ring-black/5">
-      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-lime-100 text-zinc-950">
+    <div className="rounded-[24px] bg-white/10 border border-white/10 p-5">
+      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-lime-400 text-zinc-950">
         <Icon className="h-5 w-5" />
       </div>
-      <h3 className="mt-4 text-[20px] font-medium tracking-[-0.05em] text-zinc-950">{title}</h3>
-      <p className="mt-2 text-sm leading-6 text-zinc-600">{text}</p>
+      <h3 className="mt-4 text-[18px] font-medium tracking-[-0.05em] text-white">{title}</h3>
+      <p className="mt-2 text-sm leading-6 text-white/60">{text}</p>
     </div>
   );
 }
@@ -107,7 +115,7 @@ export default function Page() {
               </div>
             </div>
             <p className="text-sm text-zinc-600 leading-6">
-              AMN Global Imports led by Miss Albertha Nana Aba Boateng is a Ghanaian retail store specializing in the importation and sale of quality electronics and home appliances. We bring the best products from around the world directly to your doorstep across Ghana.
+              AMN Global Imports led by Albertha Nana Aba Boateng is a Ghanaian retail store specializing in the importation and sale of quality electronics and home appliances. We bring the best products from around the world directly to your doorstep across Ghana.
             </p>
           </div>
           <div>
@@ -129,7 +137,7 @@ export default function Page() {
           </div>
           <div className="rounded-2xl bg-zinc-50 p-4 flex items-center gap-3">
             <MapPin className="h-4 w-4 text-lime-600 shrink-0" />
-            <p className="text-sm text-zinc-600">Based in Accra, Ghana — delivering nationwide</p>
+            <p className="text-sm text-zinc-600">Based in Accra, Ghana  delivering nationwide</p>
           </div>
         </div>
       </Modal>
@@ -216,14 +224,12 @@ export default function Page() {
             <ShoppingBag className="h-5 w-5" />
             AMN Global Imports
           </div>
-
           <nav className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-zinc-700 md:gap-8">
             <Link href="/" className="hover:text-zinc-950">Home</Link>
             <Link href="/products" className="hover:text-zinc-950">Shop</Link>
             <button onClick={() => setModal("about")} className="hover:text-zinc-950">About</button>
             <button onClick={() => setModal("support")} className="hover:text-zinc-950">Support</button>
           </nav>
-
           <div className="flex flex-wrap items-center gap-3">
             <Link href="/auth" className="rounded-full bg-white px-4 py-2 text-sm text-zinc-800 shadow-sm ring-1 ring-black/5 transition hover:bg-zinc-100">
               Login
@@ -245,7 +251,7 @@ export default function Page() {
             Discover TVs, refrigerators, washing machines, air conditioners, and everyday home electronics built for comfort, convenience, and modern living.
           </p>
           <div className="mt-8 flex w-full flex-col items-stretch justify-center gap-3 sm:w-auto sm:flex-row sm:items-center">
-            <Link href="/products" className="inline-flex items-center justify-center gap-2 rounded-full bg-lime-400 px-5 py-3 text-sm font-medium text-zinc-950 shadow-sm transition hover:bg-lime-300">
+            <Link href="/products" className="inline-flex items-center justify-center gap-2 rounded-full bg-zinc-950 px-5 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-zinc-800">
               Shop electronics <ArrowRight className="h-4 w-4" />
             </Link>
             <Link href="/products" className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-medium text-zinc-950 shadow-sm ring-1 ring-black/5 transition hover:bg-zinc-100">
@@ -264,13 +270,13 @@ export default function Page() {
       </section>
 
       {/* FEATURE BAND */}
-      <section className="w-full bg-lime-400 px-4 py-10 sm:px-6 lg:px-12 lg:py-14">
+      <section className="w-full bg-zinc-950 px-4 py-10 sm:px-6 lg:px-12 lg:py-14">
         <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
           <div>
-            <SectionLabel>Easy checkout • trusted store • retail-ready</SectionLabel>
-            <h2 className="mt-5 max-w-[620px] text-[34px] leading-[0.95] tracking-[-0.08em] sm:text-[44px] lg:text-[56px]">FAST SHOPPING,<br />CLEAR PRICING</h2>
-            <p className="mt-5 max-w-[560px] text-sm leading-7 text-zinc-900/80 sm:text-base">Compare devices, choose the right appliance, and complete checkout without clutter.</p>
-            <Link href="/products" className="mt-6 inline-flex items-center gap-2 rounded-full bg-zinc-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-zinc-800">
+            <SectionLabel light>Easy checkout • trusted store • retail-ready</SectionLabel>
+            <h2 className="mt-5 max-w-[620px] text-[34px] leading-[0.95] tracking-[-0.08em] text-white sm:text-[44px] lg:text-[56px]">FAST SHOPPING,<br />CLEAR PRICING</h2>
+            <p className="mt-5 max-w-[560px] text-sm leading-7 text-white/60 sm:text-base">Compare devices, choose the right appliance, and complete checkout without clutter.</p>
+            <Link href="/products" className="mt-6 inline-flex items-center gap-2 rounded-full bg-lime-400 px-5 py-3 text-sm font-medium text-zinc-950 transition hover:bg-lime-300">
               Browse top deals <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -293,7 +299,7 @@ export default function Page() {
               <div className="mt-4 rounded-2xl bg-zinc-950 px-4 py-3 text-white">
                 <div className="flex items-center justify-between text-sm"><span>Total</span><span className="font-semibold">....</span></div>
               </div>
-              <Link href="/checkout" className="mt-4 block w-full rounded-full bg-lime-400 py-3 text-center text-sm font-medium text-zinc-950 transition hover:bg-lime-300">Checkout now</Link>
+              <Link href="/checkout" className="mt-4 block w-full rounded-full bg-zinc-950 py-3 text-center text-sm font-medium text-white transition hover:bg-zinc-800">Checkout now</Link>
             </div>
           </div>
         </div>
@@ -313,7 +319,7 @@ export default function Page() {
             const Icon = item.icon;
             return (
               <Link key={item.name} href="/products" className="flex items-center gap-4 rounded-[26px] bg-white p-5 shadow-[0_16px_38px_rgba(15,23,42,0.06)] ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:bg-zinc-50">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-lime-100 text-zinc-950"><Icon className="h-5 w-5" /></div>
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-950 text-white"><Icon className="h-5 w-5" /></div>
                 <div>
                   <div className="text-[17px] font-medium tracking-[-0.04em] text-zinc-950">{item.name}</div>
                   <div className="mt-1 text-sm text-zinc-500">Shop now</div>
@@ -324,19 +330,52 @@ export default function Page() {
         </div>
       </section>
 
-      {/* BENEFITS */}
+      {/* BENEFITS + FOUNDER PHOTO */}
       <section className="w-full bg-zinc-900 px-4 py-10 text-white sm:px-6 lg:px-12 lg:py-14">
-        <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-          <div>
-            <SectionLabel>Trusted store</SectionLabel>
-            <h2 className="mt-4 text-[32px] leading-[0.95] tracking-[-0.08em] sm:text-[44px] lg:text-[56px]">BUILT FOR<br />HOMES THAT WORK SMARTER</h2>
-            <p className="mt-4 max-w-[560px] text-sm leading-7 text-white/70 sm:text-base">Make shopping easier with clear product details, support you can reach, and reliable delivery.</p>
-            <Link href="/products" className="mt-6 inline-flex items-center gap-2 rounded-full bg-lime-400 px-5 py-3 text-sm font-medium text-zinc-950 transition hover:bg-lime-300">Learn more <ArrowRight className="h-4 w-4" /></Link>
+
+        {/* Top row: small photo left + text right */}
+        <div className="flex flex-col sm:flex-row gap-6 items-start mb-8">
+
+          {/* Founder photo — small and fixed */}
+          <div className="relative shrink-0 w-[140px] sm:w-[160px]">
+            <div className="w-full h-[190px] sm:h-[210px] overflow-hidden rounded-[16px]">
+              <img
+                src="/founder.jpg.png"
+                alt="Albertha Nana Aba Boateng"
+                className="w-full h-full object-cover object-top"
+              />
+            </div>
+            <div className="mt-2 rounded-[10px] bg-lime-400 px-2.5 py-2">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-900">Founder & CEO</p>
+              <p className="text-[11px] font-semibold text-zinc-800 mt-0.5 leading-tight">Albertha Nana Aba Boateng</p>
+              <p className="text-[10px] text-zinc-700">AMN Global Imports</p>
+            </div>
           </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            {benefits.map((item) => <BenefitCard key={item.title} {...item} />)}
+
+          {/* Text */}
+          <div className="flex-1">
+            <SectionLabel light>Trusted store</SectionLabel>
+            <h2 className="mt-4 text-[28px] leading-[0.95] tracking-[-0.08em] sm:text-[36px] lg:text-[44px]">BUILT FOR HOMES THAT WORK SMARTER</h2>
+            <p className="mt-3 max-w-[560px] text-sm leading-7 text-white/70">Make shopping easier with clear product details, support you can reach, and reliable delivery — backed by someone who genuinely cares.</p>
+            <div className="mt-4 space-y-2">
+              {["Fast nationwide delivery across Ghana", "Warranty-backed products you can trust", "Flexible payment via Paystack"].map((point) => (
+                <div key={point} className="flex items-center gap-3">
+                  <span className="h-2 w-2 rounded-full bg-lime-400 shrink-0" />
+                  <p className="text-sm text-white/80">{point}</p>
+                </div>
+              ))}
+            </div>
+            <Link href="/products" className="mt-6 inline-flex items-center gap-2 rounded-full bg-lime-400 px-5 py-3 text-sm font-medium text-zinc-950 transition hover:bg-lime-300">
+              Learn more <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         </div>
+
+        {/* Benefit cards below */}
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {benefits.map((item) => <BenefitCard key={item.title} {...item} />)}
+        </div>
+
       </section>
 
       {/* WHY BUY HERE */}
@@ -351,7 +390,7 @@ export default function Page() {
                 return (
                   <div key={card.title} className="rounded-[24px] bg-zinc-50 p-5">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-lime-100 text-zinc-950"><Icon className="h-5 w-5" /></div>
+                      <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-950 text-white"><Icon className="h-5 w-5" /></div>
                       <h3 className="text-lg font-medium tracking-[-0.04em] text-zinc-950">{card.title}</h3>
                     </div>
                     <p className="mt-3 text-sm leading-6 text-zinc-600">{card.text}</p>
@@ -451,7 +490,7 @@ export default function Page() {
             </div>
           </div>
           <div className="rounded-[34px] bg-zinc-950 p-7 text-white shadow-[0_24px_60px_rgba(15,23,42,0.18)] lg:p-10">
-            <SectionLabel>Limited offer</SectionLabel>
+            <SectionLabel light>Limited offer</SectionLabel>
             <h2 className="mt-4 text-[32px] leading-[0.95] tracking-[-0.08em] sm:text-[44px]">GET THE BEST<br />DEALS FOR YOUR HOME</h2>
             <div className="mt-8 rounded-[28px] bg-white p-5 text-zinc-950">
               <div className="flex items-center justify-between gap-3">
@@ -460,7 +499,7 @@ export default function Page() {
                   <span className="text-sm font-semibold">%</span>
                 </div>
               </div>
-              <Link href="/products" className="mt-5 inline-flex items-center gap-2 rounded-full bg-lime-400 px-5 py-3 text-sm font-medium text-zinc-950 transition hover:bg-lime-300">Claim offer <ArrowRight className="h-4 w-4" /></Link>
+              <Link href="/products" className="mt-5 inline-flex items-center gap-2 rounded-full bg-zinc-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-zinc-800">Claim offer <ArrowRight className="h-4 w-4" /></Link>
             </div>
             <div className="mt-6 flex items-center gap-3 text-sm text-white/70">
               <Headphones className="h-4 w-4 text-lime-400" />
@@ -471,38 +510,38 @@ export default function Page() {
       </section>
 
       {/* FOOTER */}
-      <footer className="w-full bg-white px-4 pb-10 pt-10 sm:px-6 lg:px-12">
+      <footer className="w-full bg-zinc-950 px-4 pb-10 pt-10 sm:px-6 lg:px-12">
         <div className="grid w-full gap-10 md:grid-cols-4">
           <div>
-            <div className="flex items-center gap-2 text-[18px] font-semibold tracking-[-0.04em]">
+            <div className="flex items-center gap-2 text-[18px] font-semibold tracking-[-0.04em] text-white">
               <ShoppingBag className="h-5 w-5" />
               AMN Global Imports
             </div>
-            <p className="mt-4 max-w-[260px] text-sm leading-6 text-zinc-600">Electronics and home appliances with a clean, trustworthy shopping experience from discovery to delivery.</p>
+            <p className="mt-4 max-w-[260px] text-sm leading-6 text-white/50">Electronics and home appliances with a clean, trustworthy shopping experience from discovery to delivery.</p>
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-zinc-950">Shop</h3>
+            <h3 className="text-sm font-semibold text-white">Shop</h3>
             <div className="mt-4 space-y-2">
-              <Link href="/products" className="block text-sm text-zinc-600 hover:text-zinc-950">New arrivals</Link>
-              <Link href="/products" className="block text-sm text-zinc-600 hover:text-zinc-950">Browse products</Link>
+              <Link href="/products" className="block text-sm text-white/50 hover:text-white">New arrivals</Link>
+              <Link href="/products" className="block text-sm text-white/50 hover:text-white">Browse products</Link>
             </div>
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-zinc-950">Company</h3>
+            <h3 className="text-sm font-semibold text-white">Company</h3>
             <div className="mt-4 space-y-2">
-              <button onClick={() => setModal("about")} className="block text-sm text-zinc-600 hover:text-zinc-950">About us</button>
+              <button onClick={() => setModal("about")} className="block text-sm text-white/50 hover:text-white">About us</button>
             </div>
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-zinc-950">Support</h3>
+            <h3 className="text-sm font-semibold text-white">Support</h3>
             <div className="mt-4 space-y-2">
-              <button onClick={() => setModal("support")} className="block text-sm text-zinc-600 hover:text-zinc-950">Help center</button>
-              <button onClick={() => setModal("contact")} className="block text-sm text-zinc-600 hover:text-zinc-950">Contact</button>
-              <button onClick={() => setModal("faq")} className="block text-sm text-zinc-600 hover:text-zinc-950">FAQ</button>
+              <button onClick={() => setModal("support")} className="block text-sm text-white/50 hover:text-white">Help center</button>
+              <button onClick={() => setModal("contact")} className="block text-sm text-white/50 hover:text-white">Contact</button>
+              <button onClick={() => setModal("faq")} className="block text-sm text-white/50 hover:text-white">FAQ</button>
             </div>
           </div>
         </div>
-        <div className="mt-8 border-t border-zinc-200 pt-6 text-sm text-zinc-500">
+        <div className="mt-8 border-t border-white/10 pt-6 text-sm text-white/30">
           © 2026 AMNGlobal Imports. Built for electronics and home appliance sales.
         </div>
       </footer>
