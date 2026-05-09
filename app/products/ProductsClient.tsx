@@ -295,27 +295,13 @@ export default function ProductsClient() {
   };
 
   const categories = useMemo(() => {
-    const apiCategories = swellCategories.map((cat) => ({
-      name: cat.name || "Uncategorized",
-      slug: String(cat.slug || cat.name || "uncategorized").toLowerCase(),
-    }));
+  const apiCategories = swellCategories.map((cat) => ({
+    name: cat.name || "Uncategorized",
+    slug: String(cat.slug || cat.name || "uncategorized").toLowerCase(),
+  }));
 
-    const productCategories = Array.from(
-      new Set(products.map((product) => getProductCategoryName(product)))
-    )
-      .filter(Boolean)
-      .map((name) => ({
-        name,
-        slug: String(name).toLowerCase(),
-      }));
-
-    const merged = [...apiCategories, ...productCategories].filter(
-      (cat, index, self) =>
-        index === self.findIndex((c) => c.slug === cat.slug)
-    );
-
-    return [{ name: "All", slug: "all" }, ...merged];
-  }, [products, swellCategories]);
+  return [{ name: "All", slug: "all" }, ...apiCategories];
+}, [swellCategories]);
 
   const filteredProducts = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
