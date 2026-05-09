@@ -78,17 +78,27 @@ export default function ProductsClient() {
 
   const productsPerPage = 12;
 
+  // Fetch products from Swell — re-fetches when category changes
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
         setError("");
 
-        const response = await swell.products.list({
+        const query: any = {
           limit: 100,
           expand: ["images", "categories"],
-        });
+        };
 
+        if (
+          selectedCategory &&
+          selectedCategory !== "All" &&
+          selectedCategory !== "all"
+        ) {
+          query.category = selectedCategory;
+        }
+
+        const response = await swell.products.list(query);
         setProducts(response.results || []);
       } catch (err) {
         console.error("Failed to load products:", err);
@@ -99,7 +109,7 @@ export default function ProductsClient() {
     };
 
     fetchProducts();
-  }, []);
+  }, [selectedCategory]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -201,20 +211,6 @@ export default function ProductsClient() {
 
   const getProductPrice = (product: any) => Number(product?.price) || 0;
 
-  const getProductCategorySlug = (product: any) => {
-    const firstCategory =
-      product?.categories?.[0] || product?.category || null;
-
-    return String(firstCategory?.slug || firstCategory?.name || "uncategorized").toLowerCase();
-  };
-
-  const getProductCategoryName = (product: any) => {
-    const firstCategory =
-      product?.categories?.[0] || product?.category || null;
-
-    return String(firstCategory?.name || firstCategory?.slug || "Uncategorized");
-  };
-
   const isProductInStock = (product: any) => {
     const stockStatus = String(
       product?.stock_status ||
@@ -295,13 +291,13 @@ export default function ProductsClient() {
   };
 
   const categories = useMemo(() => {
-  const apiCategories = swellCategories.map((cat) => ({
-    name: cat.name || "Uncategorized",
-    slug: String(cat.slug || cat.name || "uncategorized").toLowerCase(),
-  }));
+    const apiCategories = swellCategories.map((cat) => ({
+      name: cat.name || "Uncategorized",
+      slug: String(cat.slug || cat.name || "uncategorized").toLowerCase(),
+    }));
 
-  return [{ name: "All", slug: "all" }, ...apiCategories];
-}, [swellCategories]);
+    return [{ name: "All", slug: "all" }, ...apiCategories];
+  }, [swellCategories]);
 
   const filteredProducts = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -309,17 +305,14 @@ export default function ProductsClient() {
     return products.filter((product) => {
       const name = getProductName(product).toLowerCase();
       const description = String(product?.description || "").toLowerCase();
-      const categorySlug = getProductCategorySlug(product);
       const price = getProductPrice(product);
       const inStock = isProductInStock(product);
 
       const matchesSearch =
         !query || name.includes(query) || description.includes(query);
 
-      const matchesCategory =
-        selectedCategory === "All" ||
-        selectedCategory === "all" ||
-        categorySlug === selectedCategory.toLowerCase();
+      // Category filtering is handled by Swell API — always true here
+      const matchesCategory = true;
 
       const matchesPrice =
         priceFilter === "all" ||
@@ -340,7 +333,7 @@ export default function ProductsClient() {
         matchesAvailability
       );
     });
-  }, [products, searchQuery, selectedCategory, priceFilter, availabilityFilter]);
+  }, [products, searchQuery, priceFilter, availabilityFilter]);
 
   const totalPages = Math.max(
     1,
@@ -518,7 +511,7 @@ export default function ProductsClient() {
                       .toUpperCase()}
                   </span>
                   <span className="hidden sm:inline">Account</span>
-<ChevronDown className="hidden sm:inline h-4 w-4" />
+                  <ChevronDown className="hidden sm:inline h-4 w-4" />
                 </button>
 
                 {accountMenuOpen && (
@@ -571,7 +564,7 @@ export default function ProductsClient() {
                 className="flex items-center gap-2 hover:text-[#9AE600]"
               >
                 <User className="h-4 w-4" />
-<span className="hidden sm:inline">Sign up</span>
+                <span className="hidden sm:inline">Sign up</span>
               </Link>
             )}
 
@@ -810,7 +803,7 @@ export default function ProductsClient() {
 
           <div className="flex justify-between items-center mb-6 lg:mb-10">
             <span className="text-gray-400 text-sm italic">
-              Premium imports,
+              Premium imports,{" "}
               <span className="text-black font-bold cursor-pointer hover:text-[#9AE600]">
                 delivered to you
               </span>
@@ -836,7 +829,6 @@ export default function ProductsClient() {
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-8 lg:gap-x-6 lg:gap-y-12">
               {paginatedProducts.map((product) => {
                 const qty = getItemQty(product.id);
-                const isSaved = isWishlisted(product.id);
                 const productName = getProductName(product);
                 const productPrice = getProductPrice(product);
                 const productReviews = getReviewsForProduct(product.id);
